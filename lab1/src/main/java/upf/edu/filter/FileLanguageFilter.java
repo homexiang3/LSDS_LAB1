@@ -7,6 +7,8 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.Optional;
+import com.google.gson.Gson;
+
 
 public class FileLanguageFilter implements LanguageFilter {
 	
@@ -23,19 +25,28 @@ public class FileLanguageFilter implements LanguageFilter {
 	@Override
 	public void filterLanguage(String language) throws Exception {
 		
-		FileReader reader = new FileReader("/some/file.txt");
+		FileReader reader = new FileReader(this.inputFile);
 		BufferedReader bReader = new BufferedReader(reader);
 		
 		String line = bReader.readLine(); // Read one line of content
 		
-		SimplifiedTweet a = new SimplifiedTweet(0, line, 0, line, line, 0);
+		SimplifiedTweet tweet = null;
+		Optional <SimplifiedTweet> t = tweet.fromJson(line);
+		Optional <String> tweetlang = t.map(SimplifiedTweet::getLanguage);
 		
+		if(t.isPresent() && language.equals(tweetlang)) {
+			
+			FileWriter writer = new FileWriter(this.outputFile);
+			BufferedWriter bWriter = new BufferedWriter(writer);
+			
+			Gson gson = new Gson();
+			String json = gson.toJson(t);
+			
+			bWriter.write(json); // Write one line of content
+			bWriter.close(); // Close buffered writer and enclosed writer
+		}
 		
-		FileWriter writer = new FileWriter("/some/other/file.txt");
-		BufferedWriter bWriter = new BufferedWriter(writer);
-		
-		bWriter.write(line); // Write one line of content
 		bReader.close(); // Close buffered reader and enclosed reader
-		bWriter.close(); // Close buffered writer and enclosed writer
+		
 	}
 }
