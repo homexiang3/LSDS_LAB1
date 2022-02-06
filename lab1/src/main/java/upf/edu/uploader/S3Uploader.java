@@ -1,8 +1,10 @@
 package upf.edu.uploader;
 
+import java.io.File;
 import java.util.List;
 
 import com.amazonaws.services.s3.AmazonS3;
+
 
 public class S3Uploader implements Uploader {
 	
@@ -19,13 +21,23 @@ public class S3Uploader implements Uploader {
 	    
 	}
 	public boolean bucketExists(String bucket) {
-		//check if exists TO DO
-		return true;
+		
+		if (Client.doesBucketExistV2(this.bucket)) {
+			return true;
+		}else {
+			return false;
+		}
 	}
 
 	@Override
 	public void upload(List<String> files) {
-		// TODO Auto-generated method stub
+	
+		if(!bucketExists(this.bucket)) {
+			Client.createBucket(this.bucket);
+		}
+		for(int i = 0; i<files.size();i++) {
+			Client.putObject(this.bucket, this.prefix, new File(files.get(i)));
+		}
 		
 	}
 

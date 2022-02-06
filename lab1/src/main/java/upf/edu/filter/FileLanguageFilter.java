@@ -25,14 +25,15 @@ public class FileLanguageFilter implements LanguageFilter {
 	@Override
 	public void filterLanguage(String language) throws Exception {
 		
-		FileReader reader = new FileReader(this.inputFile);
-		BufferedReader bReader = new BufferedReader(reader);
+		
+		try(FileReader reader = new FileReader(this.inputFile);
+				BufferedReader bReader = new BufferedReader(reader);) {
 		
 		String line = bReader.readLine(); // Read one line of content
 		
 		SimplifiedTweet tweet = null;
 		Optional <SimplifiedTweet> t = tweet.fromJson(line);
-		Optional <String> tweetlang = t.map(SimplifiedTweet::getLanguage);
+		String tweetlang = t.map(SimplifiedTweet::getLanguage).orElse(null);
 		
 		if(t.isPresent() && language.equals(tweetlang)) {
 			
@@ -47,6 +48,7 @@ public class FileLanguageFilter implements LanguageFilter {
 		}
 		
 		bReader.close(); // Close buffered reader and enclosed reader
+		}
 		
 	}
 }
