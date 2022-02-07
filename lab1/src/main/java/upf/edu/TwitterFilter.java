@@ -14,6 +14,8 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
 public class TwitterFilter {
     public static void main( String[] args ) throws Exception {
+    	long start = System.currentTimeMillis();
+    	
         List<String> argsList = Arrays.asList(args);
         String language = argsList.get(0);
         String outputFile = argsList.get(1);
@@ -31,5 +33,6 @@ public class TwitterFilter {
         
         final S3Uploader uploader = new S3Uploader(bucket, "prefix", s3Client);
         uploader.upload(Arrays.asList(outputFile));
+        System.out.println("Languge: "+ language + " Benchmark: " + (System.currentTimeMillis() - start));
     }
 }
