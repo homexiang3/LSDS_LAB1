@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="lsds2022.lab2/src/main/java"/>
+	<classpathentry kind="lib" path="lsds2022.lab2/target/spark-test-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="output" path="lsds2022.lab2/target/classes"/>
+</classpath>
