@@ -9,6 +9,8 @@ import com.google.gson.JsonParser;
 import java.io.Serializable;
 import java.util.Optional;
 
+import org.apache.spark.api.java.JavaRDD;
+
 public class SimplifiedTweet {
 
   private static JsonParser parser = new JsonParser();

@@ -1,32 +1,53 @@
 package upf.edu;
 
+
 import upf.edu.model.SimplifiedTweet;
-import spark.WordCount;
+
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+
+import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.SparkConf;
+import scala.Tuple2;
 
 public class TwitterLanguageFilterApp {
-    public static void main(String[] args) throws IOException {
-        List<String> argsList = Arrays.asList(args);
-        String language = argsList.get(0);
-        String outputFile = argsList.get(1);
-        String bucket = argsList.get(2);
-        System.out
-                .println("Language: " + language + ". Output file: " + outputFile + ". Destination bucket: " + bucket);
+    public static void main( String[] args ) throws Exception {
+    	
+    	String language = args[0];
+        String outputDir = args[1];
+        String inputDir = args[2];
 
+        //Create a SparkContext to initialize
+        SparkConf conf = new SparkConf().setAppName("Word Count");
+        JavaSparkContext sparkContext = new JavaSparkContext(conf);
+        // Load input
+        JavaRDD<String> tweets = sparkContext.textFile(inputDir);
         
-        for (String inputFile : argsList.subList(3, argsList.size())) {
-        	System.out.println("Processing: " + inputFile);
-        	WordCount a = new WordCount(inputFile, outputFile);
-        
-        // final FileLanguageFilter filter = new FileLanguageFilter(inputFile,
-        // outputFile);
-        // filter.filterLanguage(language);
-        // }
+        SimplifiedTweet tweet = null;
+		/*Optional <SimplifiedTweet> t = tweet.fromJson(tweets);
+		String tweetlang = t.map(SimplifiedTweet::getLanguage).orElse(null);
+		
+		if(t.isPresent()) {
+			
+		}*/
+		
 
-        // final S3Uploader uploader = new S3Uploader(bucket, "prefix", "upf");
-        // uploader.upload(Arrays.asList(outputFile));
+        /*JavaPairRDD<String, Integer> counts = tweets
+            .flatMap(s -> Arrays.asList(s.split("[ ]")).iterator())
+            .map(word -> normalise(word))
+            .mapToPair(word -> new Tuple2<>(word, 1))
+            .reduceByKey((a, b) -> a + b);
+        System.out.println("Total words: " + counts.count());
+        counts.saveAsTextFile(outputDir);*/
+       
+    }
+    private static String normalise(String word) {
+        return word.trim().toLowerCase();
     }
 }
+
