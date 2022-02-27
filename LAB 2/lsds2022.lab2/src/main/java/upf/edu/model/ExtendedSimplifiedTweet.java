@@ -1,11 +1,15 @@
 package upf.edu.model;
 
 import java.util.Optional;
-
+import java.io.Serializable;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class ExtendedSimplifiedTweet implements Serializable {
+	
+	private static JsonParser parser = new JsonParser();
+	
 	private final long tweetId; // the id of the tweet (’id’)
 	private final String text; // the content of the tweet (’text’)
 	private final long userId; // the user id (’user->id’)
@@ -32,39 +36,93 @@ public class ExtendedSimplifiedTweet implements Serializable {
 	    this.timestampMs = timestampMs;
 	}
 	
-	/**
-	* Returns a {@link ExtendedSimplifiedTweet} from a JSON String.
-	* If parsing fails, for any reason, return an {@link Optional#empty()}
-	*
-	* @param jsonStr
-	* @return an {@link Optional} of a {@link ExtendedSimplifiedTweet}
-	*/
-	public static Optional<ExtendedSimplifiedTweet> fromJson(String jsonStr) {
-	// IMPLEMENT ME
-		JsonElement je = parser.parse(jsonStr);
-	    JsonObject jo = je.getAsJsonObject();
+	public static JsonParser getParser() {
+	    	return parser;
+	  }
 
-	    try {
-	      long userId = jo.getAsJsonObject("user").get("id").getAsLong();
-	      String userName = jo.getAsJsonObject("user").get("name").getAsString();
+	  public static void setParser(JsonParser parser) {
+		  ExtendedSimplifiedTweet.parser = parser;
+	  }
 
-	      long tweetId = jo.get("id").getAsLong();
-	      String text = jo.get("text").getAsString();
-	      long  followersCount = jo.get("followersCount").getAsLong();
-	      String language = jo.get("language").getAsString();
-	      boolean isRetweeted = jo.get("isRetweeted").getAsBoolean();
-	      
-	      Long retweetedUserId = jo.get("retweetedUserId").getAsLong();
-	      Long retweetedTweetId = jo.get("retweetedTweetId").getAsLong();
-	      
-	      long timestampMs = jo.get("timestamp_ms").getAsLong();
-	      
-	      ExtendedSimplifiedTweet tweet = new ExtendedSimplifiedTweet(tweetId, text, userId, userName, followersCount, language, isRetweeted, retweetedUserId, retweetedTweetId, timestampMs);
-	      Optional<ExtendedSimplifiedTweet> t = Optional.ofNullable(tweet);
+	  public long getTweetId() {
+		  return tweetId;
+	  }
 
-	      return t;
-	    } finally {
-	      return Optional.empty();
-	    }
-	}
+	  public String getText() {
+		  return text;
+	  }
+
+	  public long getUserId() {
+		  return userId;
+	  }
+
+	  public String getUserName() {
+		  return userName;
+	  }
+	  
+	  public long getFollowersCount() {
+		  return followersCount;
+	  }
+
+	  public String getLanguage() {
+		  return language;
+	  }
+	  
+	  public boolean getIsRetweeted() {
+		  return isRetweeted;
+	  }
+	  
+	  public Long getRetweetedUserId() {
+		  return retweetedUserId;
+	  }
+	  
+	  public Long getRetweetedTweetId() {
+		  return retweetedTweetId;
+	  }
+
+	  public long getTimestampMs() {
+		  return timestampMs;
+	  }
+	
+		/**
+		* Returns a {@link ExtendedSimplifiedTweet} from a JSON String.
+		* If parsing fails, for any reason, return an {@link Optional#empty()}
+		*
+		* @param jsonStr
+		* @return an {@link Optional} of a {@link ExtendedSimplifiedTweet}
+		*/
+	  public static Optional<ExtendedSimplifiedTweet> fromJson(String jsonStr) {
+		  // IMPLEMENT ME
+		  JsonElement je = parser.parse(jsonStr);
+		  JsonObject jo = je.getAsJsonObject();
+
+		    try {
+		      long userId = jo.getAsJsonObject("user").get("id").getAsLong();
+		      String userName = jo.getAsJsonObject("user").get("name").getAsString();
+	
+		      long tweetId = jo.get("id").getAsLong();
+		      String text = jo.get("text").getAsString();
+		      long  followersCount = jo.get("followers_count").getAsLong();
+		      String language = jo.get("language").getAsString();
+		      
+		      boolean isRetweeted = false;
+	    	  Long retweetedUserId = null;
+	    	  Long retweetedTweetId = null;
+	    	  
+		      if (jo.has("retweeted_status")) {
+		    	  isRetweeted = true;
+		    	  retweetedUserId = jo.getAsJsonObject("retweeted_status").getAsJsonObject("user").get("id").getAsLong();
+		    	  retweetedTweetId = jo.getAsJsonObject("retweeted_status").get("id").getAsLong();
+		      }
+	
+		      long timestampMs = jo.get("timestamp_ms").getAsLong();
+		      
+		      ExtendedSimplifiedTweet tweet = new ExtendedSimplifiedTweet(tweetId, text, userId, userName, followersCount, language, isRetweeted, retweetedUserId, retweetedTweetId, timestampMs);
+		      Optional<ExtendedSimplifiedTweet> t = Optional.ofNullable(tweet);
+	
+		      return t;
+		    } finally {
+		      return Optional.empty();
+		    }
+	  }
 }
