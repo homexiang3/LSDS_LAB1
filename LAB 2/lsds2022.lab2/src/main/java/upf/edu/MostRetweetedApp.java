@@ -34,7 +34,7 @@ public class MostRetweetedApp {
             .flatMap(s -> Arrays.asList(s.split("[\n]")).iterator())					// split the input by newlines (tweets)
             .map(tweet_JSON -> ExtendedSimplifiedTweet.fromJson(tweet_JSON))			// Parse the JSON to ExtendedSimplifiedTweet
             .filter(optional -> optional.isPresent())									// Discard optional empty
-            .filter(rtTweet -> rtTweet.get().getIsRetweeted())								// Discard Original tweets (NO retweeted)
+            .filter(rtTweet -> rtTweet.get().isRetweeted())								// Discard Original tweets (NO retweeted)
             .mapToPair(rtTweet -> new Tuple2<>(rtTweet.get().getRetweetedUserId(), 1))	// Create tuples (retweeted_userId, 1)
             .reduceByKey((a, b) -> a + b);												// Reduced (retweeted_userId, sum)
 
@@ -45,7 +45,7 @@ public class MostRetweetedApp {
                 .flatMap(s -> Arrays.asList(s.split("[\n]")).iterator())							// split the input by endline (tweets)
                 .map(tweet_JSON -> ExtendedSimplifiedTweet.fromJson(tweet_JSON))					// Parse the JSON to ExtendedSimplifiedTweet
                 .filter(optional -> optional.isPresent())											// Discard optional empty
-                .filter(rtTweet -> rtTweet.get().getIsRetweeted())										// Discard Original tweets (NO retweeted)
+                .filter(rtTweet -> rtTweet.get().isRetweeted())										// Discard Original tweets (NO retweeted)
                 .filter(tweet ->  top20RtUsers.contains(tweet.get().getRetweetedUserId()))			// Discard retweets from NO TOP20RT Users
                 .mapToPair(rtTweet -> new Tuple2<>(rtTweet.get().getRetweetedTweetId(), 1))			// Create tuples (retweeted_tweetId, 1)
 		        .reduceByKey((a, b) -> a + b);														// Reduce by Reduced (retweeted_tweetId, sum)
@@ -56,7 +56,7 @@ public class MostRetweetedApp {
                 .flatMap(s -> Arrays.asList(s.split("[\n]")).iterator())							// split the input by endline (tweets)
                 .map(word -> ExtendedSimplifiedTweet.fromJson(word))								// Parse the JSON to ExtendedSimplifiedTweet
                 .filter(optional -> optional.isPresent())											// Discard optional empty
-                .filter(rtTweet -> !rtTweet.get().getIsRetweeted())									// Discard retweeted tweets
+                .filter(rtTweet -> !rtTweet.get().isRetweeted())									// Discard retweeted tweets
                 .filter(tweet -> tweetsOfTop20Users.contains(tweet.get().getTweetId()))				// Discard any tweet that not are from the Top20 retweeted Users
                 .map(rtTweet -> rtTweet.get().getTweetId());										// Create RDD<String> with the TweetId of these tweets
                 
@@ -67,7 +67,7 @@ public class MostRetweetedApp {
         		.flatMap(s -> Arrays.asList(s.split("[\n]")).iterator())							// split the input by endline (tweets)
                 .map(word -> ExtendedSimplifiedTweet.fromJson(word))								// Parse the JSON to ExtendedSimplifiedTweet
                 .filter(optional -> optional.isPresent())											// Discard optional empty
-                .filter(rtTweet -> rtTweet.get().getIsRetweeted())										// Discard Original tweets (NO retweeted)
+                .filter(rtTweet -> rtTweet.get().isRetweeted())										// Discard Original tweets (NO retweeted)
 		        .filter(tweet -> originalTweets.contains(tweet.get().getRetweetedTweetId()))		// Discard any retweet that not are from the original Tweets
 		        .map(rtTweet -> (rtTweet.get().getRetweetedTweetId()+" "+rtTweet.get().getRetweetedUserId()));		// Create RDD<String> with the RetweetedTweetID and getRetweetedUserID
         

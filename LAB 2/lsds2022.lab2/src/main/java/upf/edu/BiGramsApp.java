@@ -34,7 +34,7 @@ public class BiGramsApp {
             .flatMap(s -> Arrays.asList(s.split("[\n]")).iterator())
             .map(word -> ExtendedSimplifiedTweet.fromJson(word))
             .filter(optional -> optional.isPresent())
-            .filter(tweet -> !tweet.get().getIsRetweeted())
+            .filter(tweet -> !tweet.get().isRetweeted())
             .filter(tweet -> tweet.get().getLanguage().equals(language))
             .map(simplifiedTweet -> getNGrams(2, simplifiedTweet.get().getText(), language))
             .flatMap(bigrams -> bigrams.iterator())
