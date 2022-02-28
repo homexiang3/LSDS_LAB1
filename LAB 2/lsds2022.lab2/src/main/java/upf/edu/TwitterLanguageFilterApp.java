@@ -16,38 +16,32 @@ import org.apache.spark.SparkConf;
 import scala.Tuple2;
 
 public class TwitterLanguageFilterApp {
-    public static void main( String[] args ) throws Exception {
+    public static void main( String[] args ) {
     	
     	String language = args[0];
         String outputDir = args[1];
         String inputDir = args[2];
 
         //Create a SparkContext to initialize
+        
         SparkConf conf = new SparkConf().setAppName("Word Count");
         JavaSparkContext sparkContext = new JavaSparkContext(conf);
-        // Load input
-        JavaRDD<String> tweets = sparkContext.textFile(inputDir);
         
-        SimplifiedTweet tweet = null;
-		/*Optional <SimplifiedTweet> t = tweet.fromJson(tweets);
-		String tweetlang = t.map(SimplifiedTweet::getLanguage).orElse(null);
-		
-		if(t.isPresent()) {
-			
-		}*/
-		
-
-        /*JavaPairRDD<String, Integer> counts = tweets
-            .flatMap(s -> Arrays.asList(s.split("[ ]")).iterator())
-            .map(word -> normalise(word))
-            .mapToPair(word -> new Tuple2<>(word, 1))
-            .reduceByKey((a, b) -> a + b);
-        System.out.println("Total words: " + counts.count());
-        counts.saveAsTextFile(outputDir);*/
+        // Load input
+        
+        JavaRDD<String> input = sparkContext.textFile(inputDir);
+        
+		// Parse and filter
+        
+        JavaRDD<SimplifiedTweet> tweets = 
+        		input.filter(t -> t.contains("created_at"))
+        			 .map(t -> SimplifiedTweet.fromJson(t))
+        			 .filter(o -> o.isPresent())
+        			 .map(o -> o.get())
+        			 .filter(tweet -> tweet.getLanguage().equals(language));
+        tweets.saveAsTextFile(outputDir);
        
     }
-    private static String normalise(String word) {
-        return word.trim().toLowerCase();
-    }
+
 }
 
