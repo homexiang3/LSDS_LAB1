@@ -2,6 +2,8 @@ package upf.edu.model;
 
 import java.util.Optional;
 import java.io.Serializable;
+
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -128,5 +130,9 @@ public class ExtendedSimplifiedTweet implements Serializable {
 		        return Optional.empty();
 		        
 		    }
+	  }
+	  @Override
+	  public String toString() {
+		  return new Gson().toJson(this);
 	  }
 }

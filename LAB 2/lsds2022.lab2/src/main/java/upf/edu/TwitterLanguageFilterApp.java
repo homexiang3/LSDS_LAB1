@@ -27,19 +27,19 @@ public class TwitterLanguageFilterApp {
         SparkConf conf = new SparkConf().setAppName("TwitterLanguageFilterApp");
         JavaSparkContext sparkContext = new JavaSparkContext(conf);
         
-        // Load input
+        JavaRDD<String> data = sparkContext.textFile(inputDir);
+
+        JavaRDD<String> tweets = data
+            .flatMap(s -> Arrays.asList(s.split("[\n]")).iterator())
+            .map(st -> SimplifiedTweet.fromJson(st))
+            .filter(o -> o.isPresent())
+            .map(t -> t.get())
+            .filter(f -> f.getLanguage().equals(language))
+            .map(s -> s.toString());				
         
-        JavaRDD<String> input = sparkContext.textFile(inputDir);
-        
-		// Parse and filter
-        
-        JavaRDD<SimplifiedTweet> tweets = input
-        			 .map(tweet -> SimplifiedTweet.fromJson(tweet))
-        			 .filter(o -> o.isPresent())
-        			 .map(o -> o.get())
-        			 .filter(o -> o.getLanguage().equals(language));
-        
+        System.out.println("Language: "+language+"  Tweets: " + tweets.count());
         tweets.saveAsTextFile(outputDir);
+        sparkContext.close();
        
     }
 

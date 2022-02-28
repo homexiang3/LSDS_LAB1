@@ -1,5 +1,6 @@
 package upf.edu.model;
 
+import com.google.gson.Gson;
 //import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -67,21 +68,17 @@ public class SimplifiedTweet {
       Optional<SimplifiedTweet> t = Optional.ofNullable(tweet);
 
       return t;
+      
     } catch(Exception ise){
+    	
       return Optional.empty();
+      
     }
 
   }
 
   @Override
   public String toString() {
-    return "SimplifiedTweet{" +
-        "tweetId=" + tweetId +
-        ", text='" + text + '\'' +
-        ", userId=" + userId +
-        ", userName='" + userName + '\'' +
-        ", language='" + language + '\'' +
-        ", timestampMs=" + timestampMs +
-        '}';
+	  return new Gson().toJson(this);
   }
 }
