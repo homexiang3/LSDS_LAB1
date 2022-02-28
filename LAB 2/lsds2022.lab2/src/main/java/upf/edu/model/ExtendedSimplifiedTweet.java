@@ -93,17 +93,18 @@ public class ExtendedSimplifiedTweet implements Serializable {
 		*/
 	  public static Optional<ExtendedSimplifiedTweet> fromJson(String jsonStr) {
 		  // IMPLEMENT ME
-		  JsonElement je = parser.parse(jsonStr);
-		  JsonObject jo = je.getAsJsonObject();
 
 		    try {
+		      JsonElement je = parser.parse(jsonStr);
+			  JsonObject jo = je.getAsJsonObject();
+			  
 		      long userId = jo.getAsJsonObject("user").get("id").getAsLong();
 		      String userName = jo.getAsJsonObject("user").get("name").getAsString();
 	
 		      long tweetId = jo.get("id").getAsLong();
 		      String text = jo.get("text").getAsString();
 		      long  followersCount = jo.get("followers_count").getAsLong();
-		      String language = jo.get("language").getAsString();
+		      String language = jo.get("lang").getAsString();
 		      
 		      boolean isRetweeted = false;
 	    	  Long retweetedUserId = null;
@@ -121,8 +122,11 @@ public class ExtendedSimplifiedTweet implements Serializable {
 		      Optional<ExtendedSimplifiedTweet> t = Optional.ofNullable(tweet);
 	
 		      return t;
-		    } finally {
-		      return Optional.empty();
+		      
+		    } catch(Exception ise){
+		    	
+		        return Optional.empty();
+		        
 		    }
 	  }
 }

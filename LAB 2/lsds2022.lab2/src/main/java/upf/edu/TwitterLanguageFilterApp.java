@@ -24,7 +24,7 @@ public class TwitterLanguageFilterApp {
 
         //Create a SparkContext to initialize
         
-        SparkConf conf = new SparkConf().setAppName("Word Count");
+        SparkConf conf = new SparkConf().setAppName("TwitterLanguageFilterApp");
         JavaSparkContext sparkContext = new JavaSparkContext(conf);
         
         // Load input
@@ -33,12 +33,12 @@ public class TwitterLanguageFilterApp {
         
 		// Parse and filter
         
-        JavaRDD<SimplifiedTweet> tweets = 
-        		input.filter(t -> t.contains("created_at"))
-        			 .map(t -> SimplifiedTweet.fromJson(t))
+        JavaRDD<SimplifiedTweet> tweets = input
+        			 .map(tweet -> SimplifiedTweet.fromJson(tweet))
         			 .filter(o -> o.isPresent())
         			 .map(o -> o.get())
-        			 .filter(tweet -> tweet.getLanguage().equals(language));
+        			 .filter(o -> o.getLanguage().equals(language));
+        
         tweets.saveAsTextFile(outputDir);
        
     }

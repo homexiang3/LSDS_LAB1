@@ -34,37 +34,11 @@ public class SimplifiedTweet {
 
   }
 
-  public static JsonParser getParser() {
-    return parser;
-  }
-
-  public static void setParser(JsonParser parser) {
-    SimplifiedTweet.parser = parser;
-  }
-
-  public long getTweetId() {
-    return tweetId;
-  }
-
-  public String getText() {
-    return text;
-  }
-
-  public long getUserId() {
-    return userId;
-  }
-
-  public String getUserName() {
-    return userName;
-  }
 
   public String getLanguage() {
-    return language;
+    return this.language;
   }
 
-  public long getTimestampMs() {
-    return timestampMs;
-  }
 
   /**
    * Returns a {@link SimplifiedTweet} from a JSON String.
@@ -75,25 +49,25 @@ public class SimplifiedTweet {
    */
   public static Optional<SimplifiedTweet> fromJson(String jsonStr) {
 
-    // PLACE YOUR CODE HERE!
-
-    JsonElement je = parser.parse(jsonStr);
-    JsonObject jo = je.getAsJsonObject();
 
     try {
+    	
+      JsonElement je = parser.parse(jsonStr);
+      JsonObject jo = je.getAsJsonObject();
+      
       long userId = jo.getAsJsonObject("user").get("id").getAsLong();
       String userName = jo.getAsJsonObject("user").get("name").getAsString();
 
       long tweetId = jo.get("id").getAsLong();
       String text = jo.get("text").getAsString();
-      String language = jo.get("language").getAsString();
+      String language = jo.get("lang").getAsString();
       long timestampMs = jo.get("timestamp_ms").getAsLong();
 
       SimplifiedTweet tweet = new SimplifiedTweet(tweetId, text, userId, userName, language, timestampMs);
       Optional<SimplifiedTweet> t = Optional.ofNullable(tweet);
 
       return t;
-    } finally {
+    } catch(Exception ise){
       return Optional.empty();
     }
 

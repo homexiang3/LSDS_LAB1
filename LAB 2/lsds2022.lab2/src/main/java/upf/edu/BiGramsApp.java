@@ -14,7 +14,7 @@ public class BiGramsApp {
         
         //Create a SparkContext to initialize
         
-        SparkConf conf = new SparkConf().setAppName("Word Count");
+        SparkConf conf = new SparkConf().setAppName("BiGramsApp");
         JavaSparkContext sparkContext = new JavaSparkContext(conf);
         // Load input
         JavaRDD<String> input = sparkContext.textFile(inputDir);
