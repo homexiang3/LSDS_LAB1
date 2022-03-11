@@ -8,6 +8,7 @@ import org.apache.spark.streaming.api.java.JavaPairDStream;
 import org.apache.spark.streaming.api.java.JavaReceiverInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import org.apache.spark.streaming.twitter.TwitterUtils;
+
 import scala.Tuple2;
 import twitter4j.Status;
 import twitter4j.auth.OAuthAuthorization;
@@ -32,12 +33,20 @@ public class TwitterStateless {
         final JavaRDD<String> languageMapLines = jsc
                 .sparkContext()
                 .textFile(input);
+        
         // transform it to the expected RDD like in Lab 4
         final JavaPairRDD<String, String> languageMap = LanguageMapUtils
                 .buildLanguageMap(languageMapLines);
 
         // prepare the output
-        final JavaPairDStream<String, Integer> languageRankStream = null; // IMPLEMENT ME
+       final JavaPairDStream<String,Integer> languageRankStream = stream
+    		   .transformToPair(aux ->   aux.mapToPair(word -> new Tuple2 <> (word.getLang(),1))
+               .join(languageMap)
+               .mapToPair(x -> new Tuple2 <> (x._2._2,x._2._1))
+               .reduceByKey((a,b) -> a+b))
+    		   .mapToPair(Tuple2::swap)						
+    		   .transformToPair(s ->s.sortByKey(false))		// Sort by key (Sum) in descendent way
+    		   .mapToPair(Tuple2::swap);
 
         // print first 10 results
         languageRankStream.print();
