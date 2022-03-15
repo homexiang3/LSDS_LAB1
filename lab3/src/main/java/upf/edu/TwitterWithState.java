@@ -33,15 +33,15 @@ public class TwitterWithState {
 
         // create a simpler stream of <user, count> for the given language
         final JavaPairDStream<String, Integer> tweetPerUser = stream
-        		.filter(r -> r.getLang().equals(language))
-                .mapToPair(r -> new Tuple2<>(r.getUser().getScreenName(),1))
+        		.filter(x -> x.getLang().equals(language))
+                .mapToPair(x -> new Tuple2<>(x.getUser().getScreenName(),1))
                 .reduceByKey((a,b)->a+b);
         
         // transform to a stream of <userTotal, userName> and get the first 20
         final JavaPairDStream<Integer, String> tweetsCountPerUser = tweetPerUser
         		.updateStateByKey(updateFunction)
                 .mapToPair(x->new Tuple2<>(x._2(),x._1()))
-                .transformToPair(rdd -> rdd.sortByKey(false));
+                .transformToPair(s -> s.sortByKey(false));
         
         //tweetPerUser.print();
         tweetsCountPerUser.print();
