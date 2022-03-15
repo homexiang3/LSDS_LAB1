@@ -6,6 +6,13 @@ import org.apache.spark.streaming.api.java.JavaPairDStream;
 import org.apache.spark.streaming.api.java.JavaReceiverInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import org.apache.spark.streaming.twitter.TwitterUtils;
+
+import org.apache.spark.api.java.Optional;
+import org.apache.spark.api.java.function.Function2;
+import java.util.List;
+
+
+import scala.Tuple2;
 import twitter4j.Status;
 import twitter4j.auth.OAuthAuthorization;
 import upf.edu.util.ConfigUtils;
@@ -25,15 +32,35 @@ public class TwitterWithState {
         final JavaReceiverInputDStream<Status> stream = TwitterUtils.createStream(jsc, auth);
 
         // create a simpler stream of <user, count> for the given language
-        final JavaPairDStream<String, Integer> tweetPerUser = null; // IMPLEMENT ME
-
+        final JavaPairDStream<String, Integer> tweetPerUser = stream
+        		.filter(r -> r.getLang().equals(language))
+                .mapToPair(r -> new Tuple2<>(r.getUser().getScreenName(),1))
+                .reduceByKey((a,b)->a+b);
+        
         // transform to a stream of <userTotal, userName> and get the first 20
-        final JavaPairDStream<Integer, String> tweetsCountPerUser = null; // IMPLEMENT ME
-
+        final JavaPairDStream<Integer, String> tweetsCountPerUser = tweetPerUser
+        		.updateStateByKey(updateFunction)
+                .mapToPair(x->new Tuple2<>(x._2(),x._1()))
+                .transformToPair(rdd -> rdd.sortByKey(false));
+        
+        //tweetPerUser.print();
         tweetsCountPerUser.print();
 
         // Start the application and wait for termination signal
         jsc.start();
         jsc.awaitTermination();
     }
+    static Function2<List<Integer>, Optional<Integer>, Optional<Integer>> updateFunction =
+            (values, state) -> {
+                int count = 0;
+                if(state.isPresent()){
+                    count = state.get();
+                }
+                for(int v: values){
+                    count+=v;
+                }
+
+                return Optional.of(count);
+            };
+
 }
