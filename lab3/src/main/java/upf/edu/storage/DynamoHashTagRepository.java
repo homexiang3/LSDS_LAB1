@@ -41,33 +41,37 @@ public class DynamoHashTagRepository implements IHashtagRepository, Serializable
 	    if (entities != null) {
 	    	for (HashtagEntity he : entities) {
 	    		if (he != null) {
-  				String hashtag = he.getText().toString();
-  				String lang = tweet.getLang().toString();
-  				Long tweetId = tweet.getId();
-  				// Try to update existing Hashtag
-  				try {
-	    				UpdateItemSpec updateItemSpec = new UpdateItemSpec()
-	    						.withPrimaryKey("hashtag", hashtag, "language", lang)
-	    		                .withUpdateExpression("set myCounter=myCounter+:b, tweetsId=list_append(:a,tweetsId)")
-	    		                .withValueMap(new ValueMap().withNumber(":b",1).withList(":a", tweetId))
-	    		                .withReturnValues(ReturnValue.UPDATED_NEW);
-	
-	    				UpdateItemOutcome outcome = dynamoDBTable.updateItem(updateItemSpec);
-	    				
-	    				System.out.println("Update succeeded:\n" + outcome.getUpdateItemResult());
-  				} catch(Exception e) {
-  					// Hashtag not exists, so add a new Item on the DB
-	    				System.out.println("Adding new item");
-	    				
-	    				// Creates the Hashtag Item
-	    				Item item = new Item()
-	    						.withPrimaryKey("hashtag", hashtag, "language", lang)
-	    						.withNumber("myCounter", 1)
-	                            .withList("tweetsId", Arrays.asList(tweetId));
-	    				
-	    				// Add the Item on DB
-  					dynamoDBTable.putItem(item);
-  				}
+	  				String hashtag = he.getText().toString();
+	  				String lang = tweet.getLang().toString();
+	  				Long tweetId = tweet.getId();
+	  				try {
+	  					//update query
+		    			UpdateItemSpec updateItemSpec = new UpdateItemSpec()
+		    					.withPrimaryKey("hashtag", hashtag, "language", lang)
+		    		            .withUpdateExpression("set myCounter=myCounter+:b, tweetsId=list_append(:a,tweetsId)")
+		    		            .withValueMap(new ValueMap().withNumber(":b",1).withList(":a", tweetId))
+		    		            .withReturnValues(ReturnValue.UPDATED_NEW);
+		    			
+		    			//Update on db
+		    			dynamoDBTable.updateItem(updateItemSpec);
+		    			
+		    			//print
+		    			System.out.println("Updated Hashtag: "+hashtag);
+		    				
+	  				} catch(Exception e) {
+
+		    			// Create new hashtag 
+		    			Item item = new Item()
+		    				.withPrimaryKey("hashtag", hashtag, "language", lang)
+		    				.withNumber("myCounter", 1)
+		                    .withList("tweetsId", Arrays.asList(tweetId));
+		    				
+		    			// Add to db
+	  					dynamoDBTable.putItem(item);
+	  					
+	  					//print
+	  					System.out.println("New Hashtag: "+hashtag);
+	  				}
 	    		}
 	    	}
 	    }
@@ -76,34 +80,34 @@ public class DynamoHashTagRepository implements IHashtagRepository, Serializable
   @SuppressWarnings("unchecked")
   @Override
   public List<HashTagCount> readTop10(String lang) {
-	  ArrayList<HashTagCount> list = new ArrayList<HashTagCount>();
+	  ArrayList<HashTagCount> languageList = new ArrayList<HashTagCount>();
       ArrayList<HashTagCount> top10 = new ArrayList<HashTagCount>();
 
-      // Scanning whole DB, and get interesting attributes
+      //Scan db
       ScanRequest scanRequest = new ScanRequest()
               .withTableName(tableName)
               .withAttributesToGet("hashtag","language","myCounter");
       ScanResult result = client.scan(scanRequest);
 
-      // Parse the Items to get the correct value
+      //Parse items
       for (Map<String, AttributeValue> item : result.getItems()) {
             String counter = item.values().toArray()[0].toString().split("[ ]")[1].split("[,]")[0];
             String language = item.values().toArray()[1].toString().split("[ ]")[1].split("[,]")[0];
             String hashtag = item.values().toArray()[2].toString().split("[ ]")[1].split("[,]")[0];
             
-            // Filter by language and add to a list
+            //Language filter
             if(language.equals(lang)){
               HashTagCount h = new HashTagCount(hashtag, language, Long.parseLong(counter));
-              list.add(h);
+              languageList.add(h);
             }
       }
       
-      //Sorting the hashtags using the java comparator class we created.
-      Collections.sort(list,new HashTagCompare());
+      //Rank list 
+      Collections.sort(languageList,new HashTagCompare());
       
-      // Add the TOP 10 hashtags (if there are).
+      //Get first 10 elements of list
       @SuppressWarnings("rawtypes")
-      Iterator itr=list.iterator();
+      Iterator itr=languageList.iterator();
       int i=0;
       while(itr.hasNext() && i<10){
               top10.add((HashTagCount)itr.next());

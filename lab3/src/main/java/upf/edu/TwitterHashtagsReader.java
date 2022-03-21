@@ -7,16 +7,16 @@ import upf.edu.storage.DynamoHashTagRepository;
 public class TwitterHashtagsReader {
 
     public static void main(String[] args) throws Exception {
-        String lang = args[0];
+        String language = args[0];
 
-        DynamoHashTagRepository w = new DynamoHashTagRepository();
-        List<HashTagCount> top10= w.readTop10(lang);
+        DynamoHashTagRepository db = new DynamoHashTagRepository();
+        List<HashTagCount> top10= db.readTop10(language);
 
-        //Printing the top10 hashtags of the given language.
-        System.out.println("Top 10 Hashtags in: "+lang);
-        System.out.println("\nHashtag | Counter\n");
+        //print top 10 hashtags in specified language
+        
+        System.out.println("Top 10 hashtags in language "+language);
         
         for(int i=0; i<top10.size(); i++)
-            System.out.println(top10.get(i).getHashTag()+" | "+top10.get(i).getCount());
+            System.out.println("#"+top10.get(i).getHashTag()+" : "+top10.get(i).getCount());
     }
 }

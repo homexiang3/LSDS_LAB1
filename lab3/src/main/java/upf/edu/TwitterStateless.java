@@ -29,27 +29,27 @@ public class TwitterStateless {
 
         final JavaReceiverInputDStream<Status> stream = TwitterUtils.createStream(jsc, auth);
 
-        // Read the language map file by line
-        final JavaRDD<String> languageMapLines = jsc
+        // read map.tsv by lines
+        final JavaRDD<String> lines = jsc
                 .sparkContext()
                 .textFile(input);
         
-        // transform it to the expected RDD like in Lab 4
-        final JavaPairRDD<String, String> languageMap = LanguageMapUtils
-                .buildLanguageMap(languageMapLines);
+        // add language map
+        final JavaPairRDD<String, String> linesMap = LanguageMapUtils
+                .buildLanguageMap(lines);
 
-        // prepare the output
-       final JavaPairDStream<String,Integer> languageRankStream = stream
+        //Language on tweets by descending order
+       final JavaPairDStream<String,Integer> languageCount = stream
     		   .transformToPair(aux ->   aux.mapToPair(word -> new Tuple2 <> (word.getLang(),1))
-               .join(languageMap)
+               .join(linesMap)
                .mapToPair(x -> new Tuple2 <> (x._2._2,x._2._1))
                .reduceByKey((a,b) -> a+b))
     		   .mapToPair(Tuple2::swap)						
-    		   .transformToPair(s ->s.sortByKey(false))		// Sort by key (Sum) in descendent way
+    		   .transformToPair(s ->s.sortByKey(false))		
     		   .mapToPair(Tuple2::swap);
 
-        // print first 10 results
-        languageRankStream.print();
+        // print results
+        languageCount.print();
 
         // Start the application and wait for termination signal
         jsc.start();

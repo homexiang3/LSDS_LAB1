@@ -1,12 +1,15 @@
 package upf.edu;
 
 import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.function.VoidFunction;
 import org.apache.spark.streaming.Durations;
 import org.apache.spark.streaming.api.java.JavaReceiverInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import org.apache.spark.streaming.twitter.TwitterUtils;
 import twitter4j.Status;
 import twitter4j.auth.OAuthAuthorization;
+import upf.edu.storage.DynamoHashTagRepository;
 import upf.edu.util.ConfigUtils;
 
 import java.io.IOException;
@@ -24,7 +27,20 @@ public class TwitterHashtags {
 
         final JavaReceiverInputDStream<Status> stream = TwitterUtils.createStream(jsc, auth);
 
-        // <IMPLEMENT ME>
+        stream.foreachRDD(new VoidFunction<JavaRDD<Status>>() {
+        	
+			@Override
+            public void call(JavaRDD<Status> rdd) throws Exception {
+                rdd.foreach(new VoidFunction<Status>() {
+					
+					@Override
+                    public void call(Status s) throws Exception {
+                        DynamoHashTagRepository db = new DynamoHashTagRepository();
+                        db.write(s);
+                    }
+                });
+            }
+        });
 
         // Start the application and wait for termination signal
         jsc.start();

@@ -37,14 +37,14 @@ public class TwitterWithState {
                 .mapToPair(x -> new Tuple2<>(x.getUser().getScreenName(),1))
                 .reduceByKey((a,b)->a+b);
         
-        // transform to a stream of <userTotal, userName> and get the first 20
+        // transform to a stream of <userTotal, userName> 
         final JavaPairDStream<Integer, String> tweetsCountPerUser = tweetPerUser
         		.updateStateByKey(updateFunction)
                 .mapToPair(x->new Tuple2<>(x._2(),x._1()))
                 .transformToPair(s -> s.sortByKey(false));
         
-        //tweetPerUser.print();
-        tweetsCountPerUser.print();
+        //print first 20
+        tweetsCountPerUser.print(20);
 
         // Start the application and wait for termination signal
         jsc.start();
